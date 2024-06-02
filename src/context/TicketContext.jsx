@@ -1,5 +1,6 @@
 import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export const TicketContext = createContext();
 
@@ -55,7 +56,6 @@ export const TicketContextProvider = ({ children }) => {
         data
       );
 
-      console.log("checkinggggggg", response.data);
       return response.data;
     } catch (error) {
       console.error("Error sending message:", error);
@@ -79,7 +79,6 @@ export const TicketContextProvider = ({ children }) => {
         `http://89.116.34.246:8000/ticket/${id}`,
         data
       );
-
       return response.data;
     } catch (error) {
       console.error("Error sending message:", error);
@@ -92,6 +91,7 @@ export const TicketContextProvider = ({ children }) => {
         `http://89.116.34.246:8000/messages/send`,
         data
       );
+      toast.success("Message Sent");
       setSendMessage(response.data);
     } catch (error) {
       console.error("Error sending message:", error);

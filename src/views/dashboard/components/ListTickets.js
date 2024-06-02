@@ -17,6 +17,7 @@ import DashboardCard from "../../../components/shared/DashboardCard";
 import axios from "axios";
 import { useNavigate } from "react-router";
 import { UseTicketContext } from "src/context/TicketContext";
+import toast from "react-hot-toast";
 
 const ListTickets = () => {
   const navigate = useNavigate();
@@ -54,24 +55,21 @@ const ListTickets = () => {
   useEffect(() => {
     if (currentTicketId !== null) {
       if (assigned[currentTicketId] !== undefined) {
-        const body = {
-          assigned: assigned[currentTicketId],
-        };
+        const body = { assigned: assigned[currentTicketId] };
         handleAssignTicketForUser(currentTicketId, body);
+        toast.success("User Assigned Successfully");
       }
 
       if (status[currentTicketId] !== undefined) {
-        const body = {
-          status: status[currentTicketId],
-        };
+        const body = { status: status[currentTicketId] };
         handleAssignTicketStatus(currentTicketId, body);
+        toast.success("Status Updated Successfully");
       }
 
       if (priority[currentTicketId] !== undefined) {
-        const body = {
-          priority: priority[currentTicketId],
-        };
+        const body = { priority: priority[currentTicketId] };
         handleAssignTicketPriority(currentTicketId, body);
+        toast.success("Priority Updated Successfully");
       }
     }
   }, [assigned, priority, status, currentTicketId]);
