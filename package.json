@@ -68,5 +68,10 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "description": "Live demo url <a href=\"https://modernize-react-free.netlify.app/dashboard\">Live Demo</a>",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }

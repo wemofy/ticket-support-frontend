@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from "react";
 import {
   Typography,
   Box,
@@ -9,114 +9,90 @@ import {
   TableRow,
   Chip,
   Button,
-} from '@mui/material';
-import DashboardCard from '../../../components/shared/DashboardCard';
-import FormControl from '@mui/material/FormControl';
-import Select, { SelectChangeEvent } from '@mui/material/Select';
-import MenuItem from '@mui/material/MenuItem';
-import InputLabel from '@mui/material/InputLabel';
-import axios from 'axios';
-import { useNavigate } from 'react-router';
-
-const tickets = [
-  {
-    id: '1',
-    subject: 'akshay@wemofy.in',
-    lastmessage: 'support@wemofy.in',
-    assigned: ' test 1 - from the email',
-    priority: 'Low',
-    status: 'Open',
-    Time: '22:04 , Friday',
-  },
-  {
-    id: '2',
-    subject: 'akshay@wemofy.in',
-    lastmessage: 'support@wemofy.in',
-    assigned: ' test 1 - from the email',
-    priority: 'Low',
-    status: 'Open',
-    Time: '22:04 , Friday',
-  },
-  {
-    id: '3',
-    subject: 'akshay@wemofy.in',
-    lastmessage: 'support@wemofy.in',
-    assigned: ' test 1 - from the email',
-    priority: 'Low',
-    status: 'Open',
-    Time: '22:04 , Friday',
-  },
-  {
-    id: '4',
-    subject: 'akshay@wemofy.in',
-    lastmessage: 'support@wemofy.in',
-    assigned: ' test 1 - from the email',
-    priority: 'Low',
-    status: 'Open',
-    Time: '22:04 , Friday',
-  },
-  {
-    id: '5',
-    subject: 'akshay@wemofy.in',
-    lastmessage: 'support@wemofy.in',
-    assigned: ' test 1 - from the email',
-    priority: 'Low',
-    status: 'Open',
-    Time: '22:04 , Friday',
-  },
-];
-
-const users = [
-  {
-    id: '1',
-    name: 'Nitin Shash',
-  },
-  {
-    id: '2',
-    name: 'Parijat Dalal',
-  },
-  {
-    id: '3',
-    name: 'John Shah',
-  },
-  {
-    id: '4',
-    name: 'Bhuppp Menn',
-  },
-];
+} from "@mui/material";
+import DashboardCard from "../../../components/shared/DashboardCard";
+import FormControl from "@mui/material/FormControl";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import InputLabel from "@mui/material/InputLabel";
+import axios from "axios";
+import { useNavigate } from "react-router";
+import { UseTicketContext } from "src/context/TicketContext";
 
 const ListTickets = () => {
   const [age, setAge] = React.useState({});
   const navigate = useNavigate();
   const [assigned, setAssigned] = React.useState({});
-  const [priority, setPriority] = React.useState('');
-  const [status, setStatus] = React.useState('');
+  const [priority, setPriority] = React.useState("");
+  const [status, setStatus] = React.useState("");
+  const [currentTicketId, setCurrentTicketId] = React.useState(null);
+
+  const {
+    tickets,
+    users,
+    fetchTicketDetails,
+    fetchMessagesForTicketDetails,
+    handleAssignTicketForUser,
+    handleAssignTicketStatus,
+    handleAssignTicketPriority,
+  } = UseTicketContext();
+
+  const handleDetailsClick = (ticketId) => {
+    navigate(`/ticket/${ticketId}`);
+  };
+
+  const handleGetTicketDetails = (id) => {
+    fetchTicketDetails(id);
+    fetchMessagesForTicketDetails(id);
+    handleDetailsClick(id);
+  };
 
   const handleChange = (e, ticketId) => {
-    setAssigned({ ...assigned, [ticketId]: e.target.value });
-    sendUpdateRequest(ticketId, e.target.value);
-    setPriority(tickets?.priority || 'Low');
-
-    console.log(e.target.value);
+    const { name, value } = e.target;
+    setAssigned((prevAssigned) => ({ ...prevAssigned, [ticketId]: value }));
+    setPriority(tickets?.priority || "Low");
+    setCurrentTicketId(ticketId);
   };
+
+  useEffect(() => {
+    if (currentTicketId !== null) {
+      if (assigned[currentTicketId] !== "") {
+        const body = {
+          assigned: assigned[currentTicketId],
+        };
+
+        handleAssignTicketForUser(currentTicketId, body);
+      }
+
+      if (status !== "") {
+        const body = {
+          status: status,
+        };
+
+        handleAssignTicketStatus(currentTicketId, body);
+      }
+
+      if (priority !== "") {
+        const body = {
+          priority: priority,
+        };
+
+        handleAssignTicketPriority(currentTicketId, body);
+      }
+    }
+  }, [assigned, priority, status, currentTicketId]);
 
   const sendUpdateRequest = (ticketId, userId) => {
     axios
       .put(`/api/update-ticket/${ticketId}`, { userId })
       .then((response) => {
-        console.log('Update request sent successfully:', response.data);
+        console.log("Update request sent successfully:", response.data);
       })
       .catch((error) => {
-        console.error('Error sending update request:', error);
+        console.error("Error sending update request:", error);
       });
   };
 
-  const handleDetailsClick = (ticketId) => {
-    navigate(`/ticket/${ticketId}`);
-  };
-  // const handleChange = (e) => {
-  //   setAge(e.target.value);
-  // };
   const handlePriorityChange = (e, ticketId) => {
     setPriority(e.target.value);
     sendPriorityUpdateRequest(ticketId, e.target.value);
@@ -130,20 +106,23 @@ const ListTickets = () => {
     axios
       .put(`/api/update-ticket-priority/${ticketId}`, { priority })
       .then((response) => {
-        console.log('Priority update request sent successfully:', response.data);
+        console.log(
+          "Priority update request sent successfully:",
+          response.data
+        );
       })
       .catch((error) => {
-        console.error('Error sending priority update request:', error);
+        console.error("Error sending priority update request:", error);
       });
   };
 
   return (
     <DashboardCard title="Open Tickets">
-      <Box sx={{ overflow: 'auto', width: { xs: '280px', sm: 'auto' } }}>
+      <Box sx={{ overflow: "auto", width: { xs: "280px", sm: "auto" } }}>
         <Table
           aria-label="simple table"
           sx={{
-            whiteSpace: 'nowrap',
+            whiteSpace: "nowrap",
             mt: 2,
           }}
         >
@@ -182,13 +161,13 @@ const ListTickets = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {tickets.map((ticket) => (
+            {tickets?.data?.map((ticket) => (
               <TableRow key={ticket.id}>
                 <TableCell>
                   <Typography
                     sx={{
-                      fontSize: '15px',
-                      fontWeight: '500',
+                      fontSize: "15px",
+                      fontWeight: "500",
                     }}
                   >
                     {ticket.id}
@@ -197,8 +176,8 @@ const ListTickets = () => {
                 <TableCell>
                   <Box
                     sx={{
-                      display: 'flex',
-                      alignItems: 'center',
+                      display: "flex",
+                      alignItems: "center",
                     }}
                   >
                     <Box>
@@ -208,7 +187,7 @@ const ListTickets = () => {
                       <Typography
                         color="textSecondary"
                         sx={{
-                          fontSize: '13px',
+                          fontSize: "13px",
                         }}
                       >
                         {ticket.lastmessage}
@@ -218,16 +197,19 @@ const ListTickets = () => {
                 </TableCell>
                 <TableCell>
                   <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
-                    <InputLabel id={`assigned-to-${ticket.id}-label`}>Assigned to</InputLabel>
+                    <InputLabel id={`assigned-to-${ticket.id}-label`}>
+                      Assigned to
+                    </InputLabel>
                     <Select
                       labelId={`assigned-to-${ticket.id}-label`}
                       id={`assigned-to-${ticket.id}`}
-                      value={assigned[ticket.id] || ''}
+                      name="assigned"
+                      value={assigned[ticket.id] || ""}
                       onChange={(e) => handleChange(e, ticket.id)}
                     >
-                      {users.map((user) => (
-                        <MenuItem key={user.id} value={user.id}>
-                          {user.name}
+                      {users?.data?.map((user, index) => (
+                        <MenuItem key={index} value={user?.full_name}>
+                          {user?.full_name}
                         </MenuItem>
                       ))}
                     </Select>
@@ -235,39 +217,46 @@ const ListTickets = () => {
                 </TableCell>
                 <TableCell>
                   <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
-                    <InputLabel id={`priority-${ticket.id}-label`}>Priority</InputLabel>
+                    <InputLabel id={`priority-${ticket.id}-label`}>
+                      Priority
+                    </InputLabel>
                     <Select
                       labelId={`priority-${ticket.id}-label`}
                       id={`priority-${ticket.id}`}
                       value={priority}
-                      onChange={handlePriorityChange}
+                      onChange={(e) => handlePriorityChange(e, ticket.id)}
                     >
-                      <MenuItem value="High">High</MenuItem>
-                      <MenuItem value="Medium">Medium</MenuItem>
-                      <MenuItem value="Low">Low</MenuItem>
+                      <MenuItem value="high">High</MenuItem>
+                      <MenuItem value="medium">Medium</MenuItem>
+                      <MenuItem value="low">Low</MenuItem>
                     </Select>
                   </FormControl>
                 </TableCell>
 
                 <TableCell>
                   <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
-                    <InputLabel id={`status-${ticket.id}-label`}>Status</InputLabel>
+                    <InputLabel id={`status-${ticket.id}-label`}>
+                      Status
+                    </InputLabel>
                     <Select
                       labelId={`status-${ticket.id}-label`}
                       id={`status-${ticket.id}`}
                       value={status}
-                      onChange={handleStatusChange}
+                      onChange={(e) => handleStatusChange(e, ticket.id)}
                     >
-                      <MenuItem value="High">Open</MenuItem>
-                      <MenuItem value="Medium">Progress</MenuItem>
-                      <MenuItem value="Low">Closed</MenuItem>
+                      <MenuItem value="open">Open</MenuItem>
+                      <MenuItem value="inprogress">Progress</MenuItem>
+                      <MenuItem value="closed">Closed</MenuItem>
                     </Select>
                   </FormControl>
                 </TableCell>
 
                 <TableCell align="right">
                   <Typography variant="h6">
-                    <Button variant="contained" onClick={() => handleDetailsClick(ticket.id)}>
+                    <Button
+                      variant="contained"
+                      onClick={() => handleGetTicketDetails(ticket?.id)}
+                    >
                       Ticket Details
                     </Button>
                   </Typography>
