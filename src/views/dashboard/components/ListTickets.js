@@ -207,7 +207,7 @@ const ListTickets = () => {
                     <Select
                       labelId={`priority-${ticket.id}-label`}
                       id={`priority-${ticket.id}`}
-                      value={priority[ticket.id] || "low"} // Ensure default is lowercase "low"
+                      value={priority[ticket.id] || "low"}
                       onChange={(e) => handlePriorityChange(e, ticket.id)}
                     >
                       <MenuItem value="high">High</MenuItem>
@@ -224,7 +224,7 @@ const ListTickets = () => {
                     <Select
                       labelId={`status-${ticket.id}-label`}
                       id={`status-${ticket.id}`}
-                      value={status[ticket.id] || "open"} // Ensure default is lowercase "open"
+                      value={status[ticket.id] || "open"}
                       onChange={(e) => handleStatusChange(e, ticket.id)}
                     >
                       <MenuItem value="open">Open</MenuItem>
