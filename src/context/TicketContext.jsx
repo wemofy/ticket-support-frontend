@@ -55,6 +55,7 @@ export const TicketContextProvider = ({ children }) => {
         data
       );
 
+      console.log("checkinggggggg", response.data);
       return response.data;
     } catch (error) {
       console.error("Error sending message:", error);
@@ -96,9 +97,6 @@ export const TicketContextProvider = ({ children }) => {
       console.error("Error sending message:", error);
     }
   };
-
-  console.log("ticketDetails", ticketDetails);
-  console.log("ticketMessages", ticketMessages);
 
   const value = {
     tickets,

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Typography,
   Box,
@@ -7,25 +7,23 @@ import {
   TableCell,
   TableHead,
   TableRow,
-  Chip,
   Button,
+  FormControl,
+  Select,
+  MenuItem,
+  InputLabel,
 } from "@mui/material";
 import DashboardCard from "../../../components/shared/DashboardCard";
-import FormControl from "@mui/material/FormControl";
-import Select, { SelectChangeEvent } from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import InputLabel from "@mui/material/InputLabel";
 import axios from "axios";
 import { useNavigate } from "react-router";
 import { UseTicketContext } from "src/context/TicketContext";
 
 const ListTickets = () => {
-  const [age, setAge] = React.useState({});
   const navigate = useNavigate();
-  const [assigned, setAssigned] = React.useState({});
-  const [priority, setPriority] = React.useState("");
-  const [status, setStatus] = React.useState("");
-  const [currentTicketId, setCurrentTicketId] = React.useState(null);
+  const [assigned, setAssigned] = useState({});
+  const [priority, setPriority] = useState({});
+  const [status, setStatus] = useState({});
+  const [currentTicketId, setCurrentTicketId] = useState(null);
 
   const {
     tickets,
@@ -50,33 +48,29 @@ const ListTickets = () => {
   const handleChange = (e, ticketId) => {
     const { name, value } = e.target;
     setAssigned((prevAssigned) => ({ ...prevAssigned, [ticketId]: value }));
-    setPriority(tickets?.priority || "Low");
     setCurrentTicketId(ticketId);
   };
 
   useEffect(() => {
     if (currentTicketId !== null) {
-      if (assigned[currentTicketId] !== "") {
+      if (assigned[currentTicketId] !== undefined) {
         const body = {
           assigned: assigned[currentTicketId],
         };
-
         handleAssignTicketForUser(currentTicketId, body);
       }
 
-      if (status !== "") {
+      if (status[currentTicketId] !== undefined) {
         const body = {
-          status: status,
+          status: status[currentTicketId],
         };
-
         handleAssignTicketStatus(currentTicketId, body);
       }
 
-      if (priority !== "") {
+      if (priority[currentTicketId] !== undefined) {
         const body = {
-          priority: priority,
+          priority: priority[currentTicketId],
         };
-
         handleAssignTicketPriority(currentTicketId, body);
       }
     }
@@ -94,12 +88,14 @@ const ListTickets = () => {
   };
 
   const handlePriorityChange = (e, ticketId) => {
-    setPriority(e.target.value);
-    sendPriorityUpdateRequest(ticketId, e.target.value);
+    const { value } = e.target;
+    setPriority((prevPriority) => ({ ...prevPriority, [ticketId]: value }));
+    sendPriorityUpdateRequest(ticketId, value);
   };
 
   const handleStatusChange = (e, ticketId) => {
-    setStatus(e.target.value);
+    const { value } = e.target;
+    setStatus((prevStatus) => ({ ...prevStatus, [ticketId]: value }));
   };
 
   const sendPriorityUpdateRequest = (ticketId, priority) => {
@@ -164,31 +160,19 @@ const ListTickets = () => {
             {tickets?.data?.map((ticket) => (
               <TableRow key={ticket.id}>
                 <TableCell>
-                  <Typography
-                    sx={{
-                      fontSize: "15px",
-                      fontWeight: "500",
-                    }}
-                  >
+                  <Typography sx={{ fontSize: "15px", fontWeight: "500" }}>
                     {ticket.id}
                   </Typography>
                 </TableCell>
                 <TableCell>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                    }}
-                  >
+                  <Box sx={{ display: "flex", alignItems: "center" }}>
                     <Box>
                       <Typography variant="subtitle2" fontWeight={600}>
                         {ticket.subject}
                       </Typography>
                       <Typography
                         color="textSecondary"
-                        sx={{
-                          fontSize: "13px",
-                        }}
+                        sx={{ fontSize: "13px" }}
                       >
                         {ticket.lastmessage}
                       </Typography>
@@ -223,7 +207,7 @@ const ListTickets = () => {
                     <Select
                       labelId={`priority-${ticket.id}-label`}
                       id={`priority-${ticket.id}`}
-                      value={priority}
+                      value={priority[ticket.id] || "low"} // Ensure default is lowercase "low"
                       onChange={(e) => handlePriorityChange(e, ticket.id)}
                     >
                       <MenuItem value="high">High</MenuItem>
@@ -232,7 +216,6 @@ const ListTickets = () => {
                     </Select>
                   </FormControl>
                 </TableCell>
-
                 <TableCell>
                   <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
                     <InputLabel id={`status-${ticket.id}-label`}>
@@ -241,16 +224,15 @@ const ListTickets = () => {
                     <Select
                       labelId={`status-${ticket.id}-label`}
                       id={`status-${ticket.id}`}
-                      value={status}
+                      value={status[ticket.id] || "open"} // Ensure default is lowercase "open"
                       onChange={(e) => handleStatusChange(e, ticket.id)}
                     >
                       <MenuItem value="open">Open</MenuItem>
-                      <MenuItem value="inprogress">Progress</MenuItem>
+                      <MenuItem value="inprogress">In Progress</MenuItem>
                       <MenuItem value="closed">Closed</MenuItem>
                     </Select>
                   </FormControl>
                 </TableCell>
-
                 <TableCell align="right">
                   <Typography variant="h6">
                     <Button

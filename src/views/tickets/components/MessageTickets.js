@@ -148,13 +148,14 @@ const MessageTickets = () => {
                       <Select
                         labelId={`assigned-to-${ticketDetails?.data?.id}-label`}
                         id={`assigned-to-${ticketDetails?.data?.id}`}
+                        name="assigned"
                         value={assigned[ticketDetails?.data?.id] || ""}
                         onChange={(e) =>
                           handleChange(e, ticketDetails?.data?.id)
                         }
                       >
                         {users?.data?.map((user) => (
-                          <MenuItem key={user.id} value={user.id}>
+                          <MenuItem key={user.id} value={user.full_name}>
                             {user?.full_name}
                           </MenuItem>
                         ))}
