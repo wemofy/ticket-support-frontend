@@ -1,6 +1,7 @@
 import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
 import toast from "react-hot-toast";
+import { useParams } from "react-router";
 
 export const TicketContext = createContext();
 
@@ -11,6 +12,8 @@ export const TicketContextProvider = ({ children }) => {
   const [ticketMessages, setTicketMessages] = useState([]);
   const [sendMessage, setSendMessage] = useState([]);
   const [reply, setReply] = useState("");
+
+  const { ticketId } = useParams();
 
   const fetchTickets = async () => {
     try {
@@ -117,6 +120,11 @@ export const TicketContextProvider = ({ children }) => {
     fetchTickets();
     fetchUsers();
   }, []);
+
+  useEffect(() => {
+    fetchTicketDetails(ticketId);
+    fetchMessagesForTicketDetails(ticketId);
+  }, [reply]);
 
   return (
     <TicketContext.Provider value={value}>{children}</TicketContext.Provider>
