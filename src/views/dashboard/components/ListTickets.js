@@ -20,8 +20,6 @@ import { useQuery } from "@tanstack/react-query";
 import { UseAssignUser } from "src/hooks/UseAssignUser";
 import { UseUpdatePriority } from "src/hooks/UseUpdatePriority";
 import { UseUpdateStatus } from "src/hooks/UseUpdateStatus";
-import toast from "react-hot-toast";
-import { UseFetchTicketDetails } from "src/hooks/UseFetchTicketDetails";
 
 const ListTickets = () => {
   const navigate = useNavigate();

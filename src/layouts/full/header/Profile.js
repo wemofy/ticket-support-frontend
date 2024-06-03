@@ -1,19 +1,8 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import {
-  Avatar,
-  Box,
-  Menu,
-  Button,
-  IconButton,
-  MenuItem,
-  ListItemIcon,
-  ListItemText,
-} from "@mui/material";
+import { Avatar, Box, Menu, Button, IconButton } from "@mui/material";
 
-import { IconListCheck, IconMail, IconUser } from "@tabler/icons";
-
-import ProfileImg from "src/assets/images/profile/user-1.jpg";
+import ProfileImg from "src/assets/images/profile/user-1.png";
 
 const Profile = () => {
   const [anchorEl2, setAnchorEl2] = useState(null);
