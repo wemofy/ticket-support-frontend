@@ -10,7 +10,7 @@ const Menuitems = [
 
   {
     id: uniqueId(),
-    title: "Dashboard",
+    title: "All Tickets",
     icon: IconLayoutDashboard,
     href: "/dashboard",
   },

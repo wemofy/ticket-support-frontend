@@ -15,14 +15,12 @@ import {
   CircularProgress,
 } from "@mui/material";
 import DashboardCard from "../../../components/shared/DashboardCard";
-import { useNavigate, useParams } from "react-router";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { UseTicketContext } from "src/context/TicketContext";
+import { useNavigate } from "react-router";
+import { useQuery } from "@tanstack/react-query";
 import { UseAssignUser } from "src/hooks/UseAssignUser";
 import { UseUpdatePriority } from "src/hooks/UseUpdatePriority";
 import { UseUpdateStatus } from "src/hooks/UseUpdateStatus";
-import toast from "react-hot-toast";
-import { UseFetchTicketDetails } from "src/hooks/UseFetchTicketDetails";
+// import { fetchTicket} from "../../../context/TicketContext.jsx"
 
 const ListTickets = () => {
   const navigate = useNavigate();
@@ -32,16 +30,21 @@ const ListTickets = () => {
   const [currentTicketId, setCurrentTicketId] = useState(null);
 
   const { data: users } = useQuery({ queryKey: ["users"] });
-  const { data: tickets } = useQuery({ queryKey: ["tickets"] });
+  const { data: tickets } = useQuery({
+    queryKey: ["tickets"],
+    onSuccess: (data) => {
+      console.log("tickets date ", data);
+    },
+  });
 
   const url = process.env.REACT_APP_BASE_URL;
 
-  const {
-    ticketMessages,
-    ticketDetails,
-    fetchTicketDetails,
-    fetchMessagesForTicketDetails,
-  } = UseTicketContext();
+  // const {
+  //   ticketMessages,
+  //   ticketDetails,
+  //   fetchTicketDetails,
+  //   fetchMessagesForTicketDetails,
+  // } = UseTicketContext();
 
   const handleDetailsClick = (ticketId) => {
     navigate(`/ticket/${ticketId}`, {
@@ -50,13 +53,6 @@ const ListTickets = () => {
       },
     });
   };
-
-  // const { fetchTicketDetails } = UseFetchTicketDetails({
-  //   id: currentTicketId,
-  // });
-  // const { fetchMessages } = UseFetchTicketDetails({
-  //   id: currentTicketId,
-  // });
 
   const handleGetTicketDetails = async (id) => {
     handleDetailsClick(id);
@@ -101,14 +97,44 @@ const ListTickets = () => {
     }
   }, [status, updateStatus]);
 
+  useEffect(() => {
+    const savedAssigned = localStorage.getItem("assigned");
+    const savedPriority = localStorage.getItem("priority");
+    const savedStatus = localStorage.getItem("status");
+
+    if (savedAssigned) {
+      setAssigned(JSON.parse(savedAssigned));
+    }
+    if (savedPriority) {
+      setPriority(JSON.parse(savedPriority));
+    }
+    if (savedStatus) {
+      setStatus(JSON.parse(savedStatus));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("assigned", JSON.stringify(assigned));
+  }, [assigned]);
+
+  useEffect(() => {
+    localStorage.setItem("priority", JSON.stringify(priority));
+  }, [priority]);
+
+  useEffect(() => {
+    localStorage.setItem("status", JSON.stringify(status));
+  }, [status]);
+
   const handlePriorityChange = (e, ticketId) => {
     const { value } = e.target;
     setPriority((prevPriority) => ({ ...prevPriority, [ticketId]: value }));
+    setCurrentTicketId(ticketId);
   };
 
   const handleStatusChange = (e, ticketId) => {
     const { value } = e.target;
     setStatus((prevStatus) => ({ ...prevStatus, [ticketId]: value }));
+    setCurrentTicketId(ticketId);
   };
 
   if (!tickets?.data) {
@@ -182,6 +208,7 @@ const ListTickets = () => {
                     </Box>
                   </Box>
                 </TableCell>
+                {console.log(assigned)}
                 <TableCell>
                   <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
                     <InputLabel id={`assigned-to-${ticket.id}-label`}>
@@ -213,7 +240,7 @@ const ListTickets = () => {
                     <Select
                       labelId={`priority-${ticket.id}-label`}
                       id={`priority-${ticket.id}`}
-                      value={priority[ticket.id] || "low"}
+                      value={priority[ticket.id] || ""}
                       onChange={(e) => handlePriorityChange(e, ticket.id)}
                     >
                       <MenuItem value="high">High</MenuItem>
@@ -233,7 +260,7 @@ const ListTickets = () => {
                     <Select
                       labelId={`status-${ticket.id}-label`}
                       id={`status-${ticket.id}`}
-                      value={status[ticket.id] || "open"}
+                      value={status[ticket.id] || ""}
                       onChange={(e) => handleStatusChange(e, ticket.id)}
                     >
                       <MenuItem value="open">Open</MenuItem>
