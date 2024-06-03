@@ -1,21 +1,19 @@
-import {
-  IconAperture, IconCopy, IconLayoutDashboard, IconLogin, IconMoodHappy, IconTypography, IconUserPlus
-} from '@tabler/icons';
+import { IconLayoutDashboard } from "@tabler/icons";
 
-import { uniqueId } from 'lodash';
+import { uniqueId } from "lodash";
 
 const Menuitems = [
   {
     navlabel: true,
-    subheader: 'Home',
+    subheader: "Home",
   },
 
   {
     id: uniqueId(),
-    title: 'Dashboard',
+    title: "Dashboard",
     icon: IconLayoutDashboard,
-    href: '/dashboard',
-  }
+    href: "/dashboard",
+  },
 ];
 
 export default Menuitems;

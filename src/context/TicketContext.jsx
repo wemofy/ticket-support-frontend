@@ -18,6 +18,8 @@ export const TicketContextProvider = ({ children }) => {
   const fetchTickets = async () => {
     try {
       const response = await axios.get("http://89.116.34.246:8000/ticket/");
+      toast.success("Ticket loaded Successfully");
+
       setTickets(response.data);
     } catch (error) {
       console.error("Error fetching tickets:", error);
@@ -53,9 +55,13 @@ export const TicketContextProvider = ({ children }) => {
     }
   };
   const handleAssignTicketForUser = async (id, data) => {
+    const newId = parseInt(id);
+    console.log("====================================");
+    console.log(data);
+    console.log("====================================");
     try {
       const response = await axios.put(
-        `http://89.116.34.246:8000/ticket/${id}`,
+        `http://89.116.34.246:8000/ticket/${newId}`,
         data
       );
 
@@ -82,6 +88,7 @@ export const TicketContextProvider = ({ children }) => {
         `http://89.116.34.246:8000/ticket/${id}`,
         data
       );
+      toast.success("Priority Updated Successfully");
       return response.data;
     } catch (error) {
       console.error("Error sending message:", error);
