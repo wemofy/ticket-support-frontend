@@ -14,8 +14,6 @@ export const TicketContextProvider = ({ children }) => {
       const response = await axios.get("http://89.116.34.246:8000/ticket/");
 
       setTickets(response.data);
-
-      return response.data;
     } catch (error) {
       console.error("Error fetching tickets:", error);
     }
