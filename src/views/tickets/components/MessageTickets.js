@@ -153,28 +153,15 @@ const MessageTickets = () => {
                     </Box>
                   </TableCell>
                   <TableCell>
-                    <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
-                      <InputLabel
-                        id={`assigned-to-${ticketDetails?.data?.id}-label`}
-                      >
-                        Assigned to
-                      </InputLabel>
-                      <Select
-                        labelId={`assigned-to-${ticketDetails?.data?.id}-label`}
-                        id={`assigned-to-${ticketDetails?.data?.id}`}
-                        name="assigned"
-                        value={assigned[ticketDetails?.data?.id] || ""}
-                        onChange={(e) =>
-                          handleChange(e, ticketDetails?.data?.id)
-                        }
-                      >
-                        {users?.data?.map((user, index) => (
-                          <MenuItem key={index} value={user.full_name}>
-                            {user?.full_name}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+                    <Chip
+                      sx={{
+                        px: "4px",
+                        backgroundColor: "primary.main",
+                        color: "#fff",
+                      }}
+                      size="small"
+                      label={ticketDetails?.data?.assigned_user_full_name}
+                    />
                   </TableCell>
                   <TableCell>
                     <Chip

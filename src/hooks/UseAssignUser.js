@@ -7,6 +7,7 @@ export const UseAssignUser = ({ ticket_id, body }) => {
   const { mutate: assignUser } = useMutation({
     mutationFn: async () => {
       try {
+        console.log("Running assign");
         const res = await fetch(`${url}/ticket/${ticket_id}`, {
           method: "PUT",
           headers: {
@@ -27,7 +28,7 @@ export const UseAssignUser = ({ ticket_id, body }) => {
       }
     },
     onSuccess: () => {
-      toast.success("user assigned successfully");
+      toast.success("User assigned successfully");
     },
 
     onError: (error) => {

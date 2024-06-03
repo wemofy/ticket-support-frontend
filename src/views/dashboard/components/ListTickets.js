@@ -15,14 +15,14 @@ import {
   CircularProgress,
 } from "@mui/material";
 import DashboardCard from "../../../components/shared/DashboardCard";
-import { useNavigate, useParams } from "react-router";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router";
+import { useQuery } from "@tanstack/react-query";
 import { UseTicketContext } from "src/context/TicketContext";
 import { UseAssignUser } from "src/hooks/UseAssignUser";
 import { UseUpdatePriority } from "src/hooks/UseUpdatePriority";
 import { UseUpdateStatus } from "src/hooks/UseUpdateStatus";
-import toast from "react-hot-toast";
 import { UseFetchTicketDetails } from "src/hooks/UseFetchTicketDetails";
+// import { fetchTicket} from "../../../context/TicketContext.jsx"
 
 const ListTickets = () => {
   const navigate = useNavigate();
@@ -30,9 +30,15 @@ const ListTickets = () => {
   const [priority, setPriority] = useState({});
   const [status, setStatus] = useState({});
   const [currentTicketId, setCurrentTicketId] = useState(null);
+  const [InitialStatus, setInitialStatus] = useState(null);
 
   const { data: users } = useQuery({ queryKey: ["users"] });
-  const { data: tickets } = useQuery({ queryKey: ["tickets"] });
+  const { data: tickets } = useQuery({
+    queryKey: ["tickets"],
+    onSuccess: (data) => {
+      console.log("tickets date ", data);
+    },
+  });
 
   const url = process.env.REACT_APP_BASE_URL;
 
@@ -50,13 +56,6 @@ const ListTickets = () => {
       },
     });
   };
-
-  // const { fetchTicketDetails } = UseFetchTicketDetails({
-  //   id: currentTicketId,
-  // });
-  // const { fetchMessages } = UseFetchTicketDetails({
-  //   id: currentTicketId,
-  // });
 
   const handleGetTicketDetails = async (id) => {
     handleDetailsClick(id);
@@ -104,11 +103,13 @@ const ListTickets = () => {
   const handlePriorityChange = (e, ticketId) => {
     const { value } = e.target;
     setPriority((prevPriority) => ({ ...prevPriority, [ticketId]: value }));
+    setCurrentTicketId(ticketId);
   };
 
   const handleStatusChange = (e, ticketId) => {
     const { value } = e.target;
     setStatus((prevStatus) => ({ ...prevStatus, [ticketId]: value }));
+    setCurrentTicketId(ticketId);
   };
 
   if (!tickets?.data) {
