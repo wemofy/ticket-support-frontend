@@ -1,7 +1,5 @@
 import axios from "axios";
 import { createContext, useContext, useEffect, useState } from "react";
-import toast from "react-hot-toast";
-import { useParams } from "react-router";
 
 export const TicketContext = createContext();
 
@@ -9,7 +7,6 @@ export const TicketContextProvider = ({ children }) => {
   const [tickets, setTickets] = useState([]);
   const [ticketDetails, setTicketDetails] = useState([]);
   const [ticketMessages, setTicketMessages] = useState([]);
-  const [sendMessage, setSendMessage] = useState();
   const [reply, setReply] = useState("");
 
   const fetchTickets = async () => {
@@ -19,7 +16,6 @@ export const TicketContextProvider = ({ children }) => {
       setTickets(response.data);
 
       return response.data;
-      console.log(response.data);
     } catch (error) {
       console.error("Error fetching tickets:", error);
     }

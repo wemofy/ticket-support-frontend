@@ -17,12 +17,9 @@ import {
 import DashboardCard from "../../../components/shared/DashboardCard";
 import { useNavigate } from "react-router";
 import { useQuery } from "@tanstack/react-query";
-import { UseTicketContext } from "src/context/TicketContext";
 import { UseAssignUser } from "src/hooks/UseAssignUser";
 import { UseUpdatePriority } from "src/hooks/UseUpdatePriority";
 import { UseUpdateStatus } from "src/hooks/UseUpdateStatus";
-import { UseFetchTicketDetails } from "src/hooks/UseFetchTicketDetails";
-// import { fetchTicket} from "../../../context/TicketContext.jsx"
 
 const ListTickets = () => {
   const navigate = useNavigate();
@@ -30,7 +27,6 @@ const ListTickets = () => {
   const [priority, setPriority] = useState({});
   const [status, setStatus] = useState({});
   const [currentTicketId, setCurrentTicketId] = useState(null);
-  const [InitialStatus, setInitialStatus] = useState(null);
 
   const { data: users } = useQuery({ queryKey: ["users"] });
   const { data: tickets } = useQuery({
@@ -40,14 +36,14 @@ const ListTickets = () => {
     },
   });
 
-  const url = process.env.REACT_APP_BASE_URL;
+  // const url = process.env.REACT_APP_BASE_URL;
 
-  const {
-    ticketMessages,
-    ticketDetails,
-    fetchTicketDetails,
-    fetchMessagesForTicketDetails,
-  } = UseTicketContext();
+  // const {
+  //   ticketMessages,
+  //   ticketDetails,
+  //   fetchTicketDetails,
+  //   fetchMessagesForTicketDetails,
+  // } = UseTicketContext();
 
   const handleDetailsClick = (ticketId) => {
     navigate(`/ticket/${ticketId}`, {
@@ -99,6 +95,34 @@ const ListTickets = () => {
       updateStatus();
     }
   }, [status, updateStatus]);
+
+  useEffect(() => {
+    const savedAssigned = localStorage.getItem("assigned");
+    const savedPriority = localStorage.getItem("priority");
+    const savedStatus = localStorage.getItem("status");
+
+    if (savedAssigned) {
+      setAssigned(JSON.parse(savedAssigned));
+    }
+    if (savedPriority) {
+      setPriority(JSON.parse(savedPriority));
+    }
+    if (savedStatus) {
+      setStatus(JSON.parse(savedStatus));
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("assigned", JSON.stringify(assigned));
+  }, [assigned]);
+
+  useEffect(() => {
+    localStorage.setItem("priority", JSON.stringify(priority));
+  }, [priority]);
+
+  useEffect(() => {
+    localStorage.setItem("status", JSON.stringify(status));
+  }, [status]);
 
   const handlePriorityChange = (e, ticketId) => {
     const { value } = e.target;
@@ -183,6 +207,7 @@ const ListTickets = () => {
                     </Box>
                   </Box>
                 </TableCell>
+                {console.log(assigned)}
                 <TableCell>
                   <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
                     <InputLabel id={`assigned-to-${ticket.id}-label`}>
@@ -214,7 +239,7 @@ const ListTickets = () => {
                     <Select
                       labelId={`priority-${ticket.id}-label`}
                       id={`priority-${ticket.id}`}
-                      value={priority[ticket.id] || "low"}
+                      value={priority[ticket.id] || ""}
                       onChange={(e) => handlePriorityChange(e, ticket.id)}
                     >
                       <MenuItem value="high">High</MenuItem>
@@ -234,7 +259,7 @@ const ListTickets = () => {
                     <Select
                       labelId={`status-${ticket.id}-label`}
                       id={`status-${ticket.id}`}
-                      value={status[ticket.id] || "open"}
+                      value={status[ticket.id] || ""}
                       onChange={(e) => handleStatusChange(e, ticket.id)}
                     >
                       <MenuItem value="open">Open</MenuItem>

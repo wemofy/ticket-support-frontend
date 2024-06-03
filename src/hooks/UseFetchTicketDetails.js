@@ -3,7 +3,7 @@ import { UseTicketContext } from "src/context/TicketContext";
 import toast from "react-hot-toast";
 
 export const UseFetchTicketDetails = (data) => {
-  const { setTicketDetails, setTicketMessages } = UseTicketContext();
+  const { setTicketDetails } = UseTicketContext();
   const url = process.env.REACT_APP_BASE_URL;
 
   const { mutate: fetchTicketDetails } = useMutation({

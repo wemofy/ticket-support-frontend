@@ -13,21 +13,14 @@ import {
   Paper,
   Divider,
 } from "@mui/material";
-import { useLocation, useParams } from "react-router-dom";
-import FormControl from "@mui/material/FormControl";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import InputLabel from "@mui/material/InputLabel";
+import { useLocation } from "react-router-dom";
 import DashboardCard from "../../../components/shared/DashboardCard";
-import axios from "axios";
 import { UseTicketContext } from "src/context/TicketContext";
 import { formatTime } from "src/views/utilities/FormatTime";
-import { useQuery } from "@tanstack/react-query";
 import { UseSendMessage } from "src/hooks/UseSendMessage";
 
 const MessageTickets = () => {
   const [assigned, setAssigned] = useState({});
-  const { data: users } = useQuery({ queryKey: ["users"] });
 
   const location = useLocation();
   const { ticketId } = location.state;
@@ -35,8 +28,6 @@ const MessageTickets = () => {
   const {
     ticketDetails,
     ticketMessages,
-    // users,
-    // handleSendMessage,
     reply,
     setReply,
     fetchMessagesForTicketDetails,
@@ -66,10 +57,6 @@ const MessageTickets = () => {
   const handleChange = (e, ticketId) => {
     setAssigned({ ...assigned, [ticketId]: e.target.value });
   };
-
-  // if (!ticketDetails?.data) {
-  //   return <p>Loading...</p>;
-  // }
 
   const handleGetDetails = async () => {
     await fetchTicketDetails(+ticketId);
