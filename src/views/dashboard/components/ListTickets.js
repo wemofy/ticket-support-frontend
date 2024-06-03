@@ -12,12 +12,17 @@ import {
   Select,
   MenuItem,
   InputLabel,
+  CircularProgress,
 } from "@mui/material";
 import DashboardCard from "../../../components/shared/DashboardCard";
-import axios from "axios";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { UseTicketContext } from "src/context/TicketContext";
+import { UseAssignUser } from "src/hooks/UseAssignUser";
+import { UseUpdatePriority } from "src/hooks/UseUpdatePriority";
+import { UseUpdateStatus } from "src/hooks/UseUpdateStatus";
 import toast from "react-hot-toast";
+import { UseFetchTicketDetails } from "src/hooks/UseFetchTicketDetails";
 
 const ListTickets = () => {
   const navigate = useNavigate();
@@ -26,23 +31,34 @@ const ListTickets = () => {
   const [status, setStatus] = useState({});
   const [currentTicketId, setCurrentTicketId] = useState(null);
 
+  const { data: users } = useQuery({ queryKey: ["users"] });
+  const { data: tickets } = useQuery({ queryKey: ["tickets"] });
+
+  const url = process.env.REACT_APP_BASE_URL;
+
   const {
-    tickets,
-    users,
+    ticketMessages,
+    ticketDetails,
     fetchTicketDetails,
     fetchMessagesForTicketDetails,
-    handleAssignTicketForUser,
-    handleAssignTicketStatus,
-    handleAssignTicketPriority,
   } = UseTicketContext();
 
   const handleDetailsClick = (ticketId) => {
-    navigate(`/ticket/${ticketId}`);
+    navigate(`/ticket/${ticketId}`, {
+      state: {
+        ticketId: ticketId,
+      },
+    });
   };
 
-  const handleGetTicketDetails = (id) => {
-    fetchTicketDetails(id);
-    fetchMessagesForTicketDetails(id);
+  // const { fetchTicketDetails } = UseFetchTicketDetails({
+  //   id: currentTicketId,
+  // });
+  // const { fetchMessages } = UseFetchTicketDetails({
+  //   id: currentTicketId,
+  // });
+
+  const handleGetTicketDetails = async (id) => {
     handleDetailsClick(id);
   };
 
@@ -52,43 +68,42 @@ const ListTickets = () => {
     setCurrentTicketId(ticketId);
   };
 
+  const { assignUser, isLoading: isAssigning } = UseAssignUser({
+    ticket_id: currentTicketId,
+    body: { assigned_to: assigned[currentTicketId] },
+  });
+
+  const { updatePriority, isLoading: isUpdatingPriority } = UseUpdatePriority({
+    ticket_id: currentTicketId,
+    body: { priority: priority[currentTicketId] },
+  });
+
+  const { updateStatus, isLoading: isUpdatingStatus } = UseUpdateStatus({
+    ticket_id: currentTicketId,
+    body: { status: status[currentTicketId] },
+  });
+
   useEffect(() => {
-    if (currentTicketId !== null) {
-      if (assigned[currentTicketId] !== undefined) {
-        const body = { assigned: assigned[currentTicketId] };
-        handleAssignTicketForUser(currentTicketId, body);
-        toast.success("User Assigned Successfully");
-      }
-
-      if (status[currentTicketId] !== undefined) {
-        const body = { status: status[currentTicketId] };
-        handleAssignTicketStatus(currentTicketId, body);
-        toast.success("Status Updated Successfully");
-      }
-
-      if (priority[currentTicketId] !== undefined) {
-        const body = { priority: priority[currentTicketId] };
-        handleAssignTicketPriority(currentTicketId, body);
-        toast.success("Priority Updated Successfully");
-      }
+    if (currentTicketId && assigned[currentTicketId] !== undefined) {
+      assignUser();
     }
-  }, [assigned, priority, status, currentTicketId]);
+  }, [assigned, assignUser]);
 
-  const sendUpdateRequest = (ticketId, userId) => {
-    axios
-      .put(`/api/update-ticket/${ticketId}`, { userId })
-      .then((response) => {
-        console.log("Update request sent successfully:", response.data);
-      })
-      .catch((error) => {
-        console.error("Error sending update request:", error);
-      });
-  };
+  useEffect(() => {
+    if (currentTicketId && priority[currentTicketId] !== undefined) {
+      updatePriority();
+    }
+  }, [priority, updatePriority]);
+
+  useEffect(() => {
+    if (currentTicketId && status[currentTicketId] !== undefined) {
+      updateStatus();
+    }
+  }, [status, updateStatus]);
 
   const handlePriorityChange = (e, ticketId) => {
     const { value } = e.target;
     setPriority((prevPriority) => ({ ...prevPriority, [ticketId]: value }));
-    sendPriorityUpdateRequest(ticketId, value);
   };
 
   const handleStatusChange = (e, ticketId) => {
@@ -96,19 +111,9 @@ const ListTickets = () => {
     setStatus((prevStatus) => ({ ...prevStatus, [ticketId]: value }));
   };
 
-  const sendPriorityUpdateRequest = (ticketId, priority) => {
-    axios
-      .put(`/api/update-ticket-priority/${ticketId}`, { priority })
-      .then((response) => {
-        console.log(
-          "Priority update request sent successfully:",
-          response.data
-        );
-      })
-      .catch((error) => {
-        console.error("Error sending priority update request:", error);
-      });
-  };
+  if (!tickets?.data) {
+    return <p>Loading..</p>;
+  }
 
   return (
     <DashboardCard title="Open Tickets">
@@ -190,12 +195,15 @@ const ListTickets = () => {
                       onChange={(e) => handleChange(e, ticket.id)}
                     >
                       {users?.data?.map((user, index) => (
-                        <MenuItem key={index} value={user?.full_name}>
+                        <MenuItem key={index} value={user?.email}>
                           {user?.full_name}
                         </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
+                  {isAssigning && currentTicketId === ticket.id && (
+                    <CircularProgress size={24} />
+                  )}
                 </TableCell>
                 <TableCell>
                   <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
@@ -213,6 +221,9 @@ const ListTickets = () => {
                       <MenuItem value="low">Low</MenuItem>
                     </Select>
                   </FormControl>
+                  {isUpdatingPriority && currentTicketId === ticket.id && (
+                    <CircularProgress size={24} />
+                  )}
                 </TableCell>
                 <TableCell>
                   <FormControl variant="filled" sx={{ m: 1, minWidth: 120 }}>
@@ -230,6 +241,9 @@ const ListTickets = () => {
                       <MenuItem value="closed">Closed</MenuItem>
                     </Select>
                   </FormControl>
+                  {isUpdatingStatus && currentTicketId === ticket.id && (
+                    <CircularProgress size={24} />
+                  )}
                 </TableCell>
                 <TableCell align="right">
                   <Typography variant="h6">

@@ -13,7 +13,7 @@ import {
   Paper,
   Divider,
 } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
@@ -22,60 +22,74 @@ import DashboardCard from "../../../components/shared/DashboardCard";
 import axios from "axios";
 import { UseTicketContext } from "src/context/TicketContext";
 import { formatTime } from "src/views/utilities/FormatTime";
+import { useQuery } from "@tanstack/react-query";
+import { UseSendMessage } from "src/hooks/UseSendMessage";
 
 const MessageTickets = () => {
-  const { ticketId } = useParams();
   const [assigned, setAssigned] = useState({});
+  const { data: users } = useQuery({ queryKey: ["users"] });
+
+  const location = useLocation();
+  const { ticketId } = location.state;
 
   const {
     ticketDetails,
     ticketMessages,
-    users,
-    handleSendMessage,
+    // users,
+    // handleSendMessage,
     reply,
     setReply,
     fetchMessagesForTicketDetails,
     fetchTicketDetails,
   } = UseTicketContext();
 
+  console.log({ ticketDetails, ticketMessages });
+
   const handleReplyChange = (e) => {
     setReply(e.target.value);
   };
 
-  const handleSendReply = () => {
-    const data = {
+  const { sendMessage, isPending } = UseSendMessage({
+    body: {
       body: reply,
-      ticket_id: ticketId,
-    };
+      ticket_id: +ticketId,
+    },
+  });
 
-    // Send the reply
-    handleSendMessage(data);
-    setReply("");
+  const handleSendReply = () => {
+    sendMessage();
+
+    // setReply("");
   };
+  console.log("reply", reply);
 
   const handleChange = (e, ticketId) => {
     setAssigned({ ...assigned, [ticketId]: e.target.value });
-    sendUpdateRequest(ticketId, e.target.value);
   };
 
-  const sendUpdateRequest = (ticketId, userId) => {
-    axios
-      .put(`/api/update-ticket/${ticketId}`, { userId })
-      .then((response) => {
-        console.log("Update request sent successfully:", response.data);
-      })
-      .catch((error) => {
-        console.error("Error sending update request:", error);
-      });
+  // if (!ticketDetails?.data) {
+  //   return <p>Loading...</p>;
+  // }
+
+  const handleGetDetails = async () => {
+    await fetchTicketDetails(+ticketId);
+    await fetchMessagesForTicketDetails(+ticketId);
   };
 
   useEffect(() => {
-    fetchTicketDetails(ticketId);
-    fetchMessagesForTicketDetails(ticketId);
-  }, [reply]);
+    if (ticketId) {
+      handleGetDetails();
+    }
+  }, [ticketId]);
+
+  useEffect(() => {
+    if (ticketId) {
+      fetchMessagesForTicketDetails(+ticketId);
+    }
+  }, [sendMessage]);
 
   return (
-    <DashboardCard title={`Ticket Details for ${ticketDetails?.data?.id}`}>
+    <DashboardCard title={`Ticket Details for ${ticketId} `}>
       <Box sx={{ overflow: "auto", width: { xs: "280px", sm: "auto" } }}>
         {ticketDetails?.data && (
           <Box mt={2}>
@@ -154,8 +168,8 @@ const MessageTickets = () => {
                           handleChange(e, ticketDetails?.data?.id)
                         }
                       >
-                        {users?.data?.map((user) => (
-                          <MenuItem key={user.id} value={user.full_name}>
+                        {users?.data?.map((user, index) => (
+                          <MenuItem key={index} value={user.full_name}>
                             {user?.full_name}
                           </MenuItem>
                         ))}
@@ -266,7 +280,7 @@ const MessageTickets = () => {
               color="primary"
               onClick={handleSendReply}
             >
-              Send Reply
+              {isPending ? "Sending Reply..." : "Send Reply"}
             </Button>
           </Paper>
         ) : (

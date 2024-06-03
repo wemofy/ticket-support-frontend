@@ -7,29 +7,16 @@ export const TicketContext = createContext();
 
 export const TicketContextProvider = ({ children }) => {
   const [tickets, setTickets] = useState([]);
-  const [users, setUsers] = useState([]);
   const [ticketDetails, setTicketDetails] = useState([]);
   const [ticketMessages, setTicketMessages] = useState([]);
-  const [sendMessage, setSendMessage] = useState([]);
+  const [sendMessage, setSendMessage] = useState();
   const [reply, setReply] = useState("");
-
-  const { ticketId } = useParams();
 
   const fetchTickets = async () => {
     try {
       const response = await axios.get("http://89.116.34.246:8000/ticket/");
-      toast.success("Ticket loaded Successfully");
 
       setTickets(response.data);
-    } catch (error) {
-      console.error("Error fetching tickets:", error);
-    }
-  };
-
-  const fetchUsers = async () => {
-    try {
-      const response = await axios.get("http://89.116.34.246:8000/users/all");
-      setUsers(response.data);
     } catch (error) {
       console.error("Error fetching tickets:", error);
     }
@@ -54,84 +41,21 @@ export const TicketContextProvider = ({ children }) => {
       console.error("Error fetching tickets:", error);
     }
   };
-  const handleAssignTicketForUser = async (id, data) => {
-    const newId = parseInt(id);
-    console.log("====================================");
-    console.log(data);
-    console.log("====================================");
-    try {
-      const response = await axios.put(
-        `http://89.116.34.246:8000/ticket/${newId}`,
-        data
-      );
-
-      return response.data;
-    } catch (error) {
-      console.error("Error sending message:", error);
-    }
-  };
-  const handleAssignTicketStatus = async (id, data) => {
-    try {
-      const response = await axios.put(
-        `http://89.116.34.246:8000/ticket/${id}`,
-        data
-      );
-
-      return response.data;
-    } catch (error) {
-      console.error("Error sending message:", error);
-    }
-  };
-  const handleAssignTicketPriority = async (id, data) => {
-    try {
-      const response = await axios.put(
-        `http://89.116.34.246:8000/ticket/${id}`,
-        data
-      );
-      toast.success("Priority Updated Successfully");
-      return response.data;
-    } catch (error) {
-      console.error("Error sending message:", error);
-    }
-  };
-
-  const handleSendMessage = async (data) => {
-    try {
-      const response = await axios.post(
-        `http://89.116.34.246:8000/messages/send`,
-        data
-      );
-      toast.success("Message Sent");
-      setSendMessage(response.data);
-    } catch (error) {
-      console.error("Error sending message:", error);
-    }
-  };
 
   const value = {
     tickets,
-    users,
     fetchTicketDetails,
-    ticketDetails,
-    ticketMessages,
     fetchMessagesForTicketDetails,
-    handleSendMessage,
+    ticketMessages,
+    ticketDetails,
+    setTicketDetails,
     reply,
     setReply,
-    handleAssignTicketForUser,
-    handleAssignTicketStatus,
-    handleAssignTicketPriority,
   };
 
   useEffect(() => {
     fetchTickets();
-    fetchUsers();
   }, []);
-
-  useEffect(() => {
-    fetchTicketDetails(ticketId);
-    fetchMessagesForTicketDetails(ticketId);
-  }, [reply]);
 
   return (
     <TicketContext.Provider value={value}>{children}</TicketContext.Provider>
